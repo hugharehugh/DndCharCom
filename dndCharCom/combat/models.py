@@ -1,5 +1,6 @@
 from os import O_TRUNC
 from django.db import models
+from users.models import User
 from django.db.models.enums import IntegerChoices
 from django.db.models.fields import DecimalField
 
@@ -9,11 +10,35 @@ from django.db.models.fields import DecimalField
 
 #Character model will have normal range of stats
 
+class Combat(models.model):
+    #need to pull in two character models
+    #save processing power by rolling first, and dont bother figuring out damage if they miss
+    #so check roll + roll modifiers against AC
+            # if I want to keep coding this I'll need to address a gap in the future which is:
+            # in DnD you can hit on a miss sometimes. Wacky spells / manuevers can change the
+            # outcome of a roll before the consequences of the roll are made final
+            # divination wizards! (shakes fist at cloud)
+    
+    # put their stats into the combat equations, apply damage modifiers, remove the amount
+    # of damage done from the characters health.
+    # then do the same thing with the other character.
+
+    #question for MVP?! do I want to take in a roll / click from the "player"?
+    # would be kinda cool to let them click a button on the screen and see their "roll"
+    # which would be produced by a random number function    
+    def __str__(self):
+        return self.Char_Model
+
+
 class Char_Model(models.Model):
+    # character models is the part of the app that lets users create and save characters
+    # the character model maker will allow the user to make any functional model I have
+    # finished coding.
+    # the MVP is fighter character models, so that is what I am coding first
     name = models.CharField(max_length=24)
     background = models.CharField()
     available_actions = models.IntegerField(default=1)
-    #author = username if i were supporting multiple users
+    author = models.ForeignKey(User,on_delete=models.CASCADE)
     hp = models.IntegerField(default=1)
     wpn_dmg_dice = models.IntegerField() #need to figure out what to multipy dice by.
     #a d4 is literally 1 thru 4 all equally likely, but weapon damage is fixed. so a javeline
@@ -23,6 +48,10 @@ class Char_Model(models.Model):
     #and have the user pick from the dropdown of weapons, then apply the correct damage
     modifiers = models.IntegerField()
     spell_slots = models.IntegerField()
+    
+    #don't forget to actually make the model function
+    def __str__(self):
+        return self.Char_Model
 
 #weapons need to be chosen during character creation, no switching weopons 
 # until character customization is figured out
@@ -147,4 +176,3 @@ class Char_Model(models.Model):
 #         #an observed character can't hide, and this is single combat at least to start
 #         #hiding rules are a stretch goal! lol 
 #     }
-
