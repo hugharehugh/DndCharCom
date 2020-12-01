@@ -2,21 +2,140 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DndCharCom App</title>
-      <!-- Compiled and minified CSS -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DndCharCom App</title>
+  <!-- Compiled and minified CSS -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" />
   <!-- Compiled and minified JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <!-- Axios -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js"
+    integrity="sha512-quHCp3WbBNkwLfYUMd+KwBAgpVukJu5MncuQaWXgCrfgcxCJAq/fo+oqrRKOj+UKEmyMCG3tb8RB63W+EmrOBg=="
+    crossorigin="anonymous"></script>
+  <!-- Vue -->
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+  <!-- Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+    integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+    integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+    crossorigin="anonymous"></script>
 </head>
 
+<body>
+  <nav>
+    <div class="nav-wrapper blue lighten-2">
+      <a href="{% url 'dndusers:login' %}" class="brand-logo">DnDCharCom!</a>
+      <ul id="nav-mobile" class=" right ">
+        <li><a href="">Create</a></li>
+        <li><a href="{% url 'dndusers:signup' %}">Sign Up</a></li>
+        <li><a href="{% url 'dndusers:login' %}">Login</a></li>
+        <li><a href="">Logout</a></li>
+      </ul>
+    </div>
+  </nav>
 
+  <div class="row">
+    <div class="card red-grey darken-1 col m6 offset m-3">
+      <div class="card-image">
+        <img src="[[ url 'DndCharCom\dndCharCom\combat\static\combat\dnd-image.png' ]]" />
+        <a href="//en.wikipedia.org/wiki/File:Dungeons_%26_Dragons_5th_Edition_logo.svg" title="Fair use">Fair use</a>,
+        <a href="https://en.wikipedia.org/w/index.php?curid=51501539">Link</a>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="app">
     {% block content %}
-    
-    
+
 
     {% endblock %}
+
+  </div>
+
+  [[ char_model|json_script:"char_model" ]]
+  <script>
+    var char_model = JSON.parse(document.getElementById("char_model"));
+    console.log(char_model)
+  </script>
+
+
+
+  <script>
+    let app = new Vue({
+      el: '#app',
+      delimiters: ['[[', ']]'], // This is new
+      data: {
+
+      },
+      methods: {
+        getRace: function (char_model) {
+          'human'
+          //         app.selectedRace = response.data
+          //     })
+        },
+        getClass: function (classURL) {
+          'fighter'
+          // let url = this.baseURL + classURL
+          // axios.get(url)
+          //     .then(function (response) {
+          //         app.selectedClass = response.data
+          //     })
+        },
+        increaseStat: function (stat) {
+          if (this.remaining > 0) {
+            this.attributes[stat] += 1
+          }
+        },
+        decreaseStat: function (stat) {
+          if (this.attributes[stat] > 0) {
+            this.attributes[stat] -= 1
+          }
+        }
+      },
+      mounted: function () {
+        getrace();
+        getClass();
+        increaseStat();
+        decreaseStat();
+      }, 
+      computed: {
+        remaining: function () {
+          let total = 0
+          for (key in this.attributes) {
+            total += this.attributes[key]
+          }
+
+          return 55 - total
+        }
+      },
+      created() {
+        axios.get([[combat.characters]])
+          .then(function (response) {
+            app.races = response.data.results
+          })
+        axios.get('characters/weapon_choice')
+          .then(function (response) {
+            app.classes = response.data.results
+          })
+        axios.get('characters/selected_weapon')
+          .then(function (response) {
+            app.weapons = response.data.results
+          })
+      },
+    });
+  </script>
 </body>
+
 </html>

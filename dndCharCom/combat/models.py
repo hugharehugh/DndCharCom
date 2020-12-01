@@ -1,16 +1,20 @@
 from os import O_TRUNC
+import random
+from random import randint
 from django.db import models
-from users.models import User
+from dndusers.models import DnDUser
 from django.db.models.enums import IntegerChoices
-from django.db.models.fields import DecimalField
-
+from django.db.models.fields import DecimalField, IntegerField
 # Create your models here.
+from django.db import models
 
+class MyModel(models.Model):
+    my_image = models.ImageField(upload_to='images/')
 #dndCharCom is meant to recreate tabletop RPG combat including random dice rolls by click.
 
 #Character model will have normal range of stats
 
-class Combat(models.model):
+class Combat(models.Model):
     #need to pull in two character models
     #save processing power by rolling first, and dont bother figuring out damage if they miss
     #so check roll + roll modifiers against AC
@@ -18,7 +22,7 @@ class Combat(models.model):
             # in DnD you can hit on a miss sometimes. Wacky spells / manuevers can change the
             # outcome of a roll before the consequences of the roll are made final
             # divination wizards! (shakes fist at cloud)
-    
+    damage = 0
     # put their stats into the combat equations, apply damage modifiers, remove the amount
     # of damage done from the characters health.
     # then do the same thing with the other character.
@@ -27,31 +31,81 @@ class Combat(models.model):
     # would be kinda cool to let them click a button on the screen and see their "roll"
     # which would be produced by a random number function    
     def __str__(self):
-        return self.Char_Model
+        return self.damage
 
 
 class Char_Model(models.Model):
+    #the statmaker randomly rolls 4 sets of d6 and returns the results
+    def statmaker():
+        roll1 = random.randint(1,6)
+        roll2 = random.randint(1,6)
+        roll3 = random.randint(1,6)
+        statlist = ['str_stat','con_stat','wis_stat','char_stat','int_stat','dex_stat']
+        stats = 0
+        for stats in statlist:
+            stats = roll1 + roll2 + roll3
+        return stats
     # character models is the part of the app that lets users create and save characters
     # the character model maker will allow the user to make any functional model I have
     # finished coding.
     # the MVP is fighter character models, so that is what I am coding first
-    name = models.CharField(max_length=24)
-    background = models.CharField()
-    available_actions = models.IntegerField(default=1)
-    author = models.ForeignKey(User,on_delete=models.CASCADE)
-    hp = models.IntegerField(default=1)
-    wpn_dmg_dice = models.IntegerField() #need to figure out what to multipy dice by.
+    name = models.CharField(max_length=24,blank=False)
+    background = models.CharField(max_length=200,blank=False)
+    available_actions = models.IntegerField(default=1,blank=True)
+    char_image = models.ImageField(upload_to='images/')
+    author = models.ForeignKey(DnDUser,on_delete=models.CASCADE)
+    hp = models.IntegerField() ####### FIX THIS
+    wpn_dmg_dice = [
+            ('club','4'),
+            ('dagger','4'),
+            ('Greatclub','8'),
+            ('Handaxe','6'),
+            ('Javelin','6'),
+            ('Light Hammer','4'),
+            ('Mace','6'),
+            ('Quarterstaff','6'),
+            ('Sickle','6'),
+            ('Spear','6'),
+            ('GreatAxe','12')
+    ]
+    weapon_choice = models.CharField(max_length=12,choices=wpn_dmg_dice,default='Handaxe',blank=False)
+    selected_race = models.CharField(max_length=15)
+    selected_class = models.CharField(max_length=25)
+    size = [
+        ('Sml','small'),
+        ('Med','medium'),
+        ('Lrg','large'),
+        ('Gnt','giant'),
+        ('BHM','behemoth')
+     ] #important for combat rules
+    selected_size = models.CharField(max_length=3,choices=size)
+    mvmt_speed = models.IntegerField(blank=False)
+    armor_type = [
+        ('Light','light'), 
+        ('Med','medium'),
+        ('Hev','heavy'),
+        ]
+    selected_armor = models.CharField(max_length=12,choices=armor_type,blank=True)
+    armor_penalty = models.CharField(max_length=12,blank=True)
+    str_stat = models.IntegerField(default=statmaker, blank=False)
+    con_stat = models.IntegerField(default=statmaker, blank=False)
+    int_stat = models.IntegerField(default=statmaker, blank=False)
+    wis_stat = models.IntegerField(default=statmaker, blank=False)
+    char_stat = models.IntegerField(default=statmaker,blank=False)
+    dex_stat = models.IntegerField(default=statmaker, blank=False)
+    armor_Class = models.IntegerField(default=statmaker, blank=True)
+    #need to figure out what to multipy dice by.
     #a d4 is literally 1 thru 4 all equally likely, but weapon damage is fixed. so a javeline
     #always does d6 damage + other stuff
     #should I just have a weapons list?
     #to make this work at first I could let the user set it, then later on build the weapon library
     #and have the user pick from the dropdown of weapons, then apply the correct damage
-    modifiers = models.IntegerField()
-    spell_slots = models.IntegerField()
+    modifiers = models.IntegerField(default=1,blank=True)
+    spell_slots = models.IntegerField(default=0,blank=True)
     
     #don't forget to actually make the model function
     def __str__(self):
-        return self.Char_Model
+        return self.name 
 
 #weapons need to be chosen during character creation, no switching weopons 
 # until character customization is figured out

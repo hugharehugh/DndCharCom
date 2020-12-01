@@ -1,5 +1,24 @@
-{% extends 'base.html' %}
+{% extends 'combat/base.html' %}
 
 {% block content %}
+
+<div class="container">
+
+        <ul>
+            {% for chars in combat %}
+            <li>
+                <div>
+                    <h3>[[combat.name]] <a href="[[ url 'combat:char_model' char_model.name ]]"></a></h3>
+                    <p>Background [[ combat.background ]] </p>
+                    <a href="[[ url 'combat:char_model' char_model.background ]]"></a>
+                    <p>Author: [[ combat.author ]]</p>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<!-- <h3 v-for="race in races">[[race.name]]</h3> -->
+
 
 {% endblock %}
